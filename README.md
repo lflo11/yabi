@@ -1,6 +1,13 @@
 Yet Another Brainfuck Interpreter
 =================================
 
+General Information
+-------------------
+
+Language: MIPS, using the MARS simulator
+
+Cell Size: 32 bits
+
 TODO
 ----
 
