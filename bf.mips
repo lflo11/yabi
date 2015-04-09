@@ -1,0 +1,131 @@
+.data
+
+.globl test
+test: .asciiz "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++"
+
+.globl lex_error
+lex_error: .asciiz "invalid token: "
+
+.globl not_implemented
+not_implemented: .asciiz "not implemented: "
+
+.text
+
+# persistent registers:
+#   $s0: brainfuck's pointer
+#   $s1: points to the current brainfuck token
+
+.globl main
+main:
+
+    li      $s2, 120000 # save the default size of brainfuck's memory (30000
+                        # cells, each one word (4 bytes) long
+
+    move    $a0, $s2    # allocate brainfuck's memory on the heap
+    li      $v0, 9      #
+    syscall             #
+    move    $s0, $v0    # store brainfuck's pointer in $s0
+
+    la      $s1, test   # initialize brainfuck's program counter in $s1
+
+# clear all the cells to be used by brainfuck
+
+    move    $t0, $s0    # $t0: pointer for cell-clearing
+    lui     $t1, 0      # $t1: counter for cell-clearing
+    lui     $t2, 0      # $t2: used to zero memory cells
+
+clear_loop:
+
+    # "while counter != brainfuck memory size"
+    beq     $t1, $s2, exec_main
+
+    sw      $t2, ($t0)      # zero the cell at the pointer
+
+    addiu   $t0, $t0, 4     # increment the pointer by a word
+    addiu   $t1, $t1, 1     # increment the counter
+
+    j       clear_loop      # continue
+
+inc_pc:
+
+    addiu   $s1, $s1, 1
+
+exec_main:
+
+    lb      $t1, ($s1)      # load the current token
+
+    # possible tokens:
+
+    li      $t0, '>'
+    beq     $t0, $t1, exec_rangle
+
+    li      $t0, '<'
+    beq     $t0, $t1, exec_langle
+
+    li      $t0, '+'
+    beq     $t0, $t1, exec_plus
+
+    li      $t0, '-'
+    beq     $t0, $t1, exec_minus
+
+    li      $t0, '.'
+    beq     $t0, $t1, exec_dot
+
+    li      $t0, ','
+    beq     $t0, $t1, exec_comma
+
+    li      $t0, '['
+    beq     $t0, $t1, exec_lbracket
+
+    li      $t0, ']'
+    beq     $t0, $t1, exec_rbracket
+
+    li      $t0, '\0'
+    beq     $t0, $t1, exec_eof
+
+    # invalid token
+
+    la      $a0, lex_error      # print error message
+    li      $v0, 4              #
+    syscall                     #
+
+    move    $a0, $t1            # print the invalid token
+    li      $v0, 11             #
+    syscall                     #
+
+exec_eof:
+
+    li      $v0, 10             # terminate the program
+    syscall                     #
+
+exec_plus:
+
+    lw      $t0, ($s0)          # increment the value pointed to by $s0
+    addi    $t0, $t0, 1         #
+    sw      $t0, ($s0)          #
+    j       inc_pc              # fetch the next instruction
+
+exec_minus:
+
+    lw      $t0, ($s0)          # decrement the value pointed to by $s0
+    addi    $t0, $t0, -1        #
+    sw      $t0, ($s0)          #
+    j       inc_pc              # fetch the next instruction
+
+exec_rangle:
+exec_langle:
+exec_dot:
+exec_comma:
+exec_lbracket:
+exec_rbracket:
+
+    la      $a0, not_implemented    # print not implemented
+    li      $v0, 4                  #
+    syscall                         #
+
+    move    $a0, $t1                # print the unimplemented token
+    li      $v0, 11                 #
+    syscall                         #
+
+    j       exec_eof                # terminate the program
+
