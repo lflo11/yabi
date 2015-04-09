@@ -1,10 +1,7 @@
 .data
 
 .globl test
-test: .asciiz "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++"
-
-.globl lex_error
-lex_error: .asciiz "invalid token: "
+test: .asciiz "----------------16 +++++++++++ 11 == negative 5"
 
 .globl not_implemented
 not_implemented: .asciiz "not implemented: "
@@ -28,12 +25,12 @@ main:
 
     la      $s1, test   # initialize brainfuck's program counter in $s1
 
-# clear all the cells to be used by brainfuck
-
+    # initialize the loop below
     move    $t0, $s0    # $t0: pointer for cell-clearing
     lui     $t1, 0      # $t1: counter for cell-clearing
     lui     $t2, 0      # $t2: used to zero memory cells
 
+# clear all the cells to be used by brainfuck
 clear_loop:
 
     # "while counter != brainfuck memory size"
@@ -83,15 +80,8 @@ exec_main:
     li      $t0, '\0'
     beq     $t0, $t1, exec_eof
 
-    # invalid token
-
-    la      $a0, lex_error      # print error message
-    li      $v0, 4              #
-    syscall                     #
-
-    move    $a0, $t1            # print the invalid token
-    li      $v0, 11             #
-    syscall                     #
+    # the token is not a brainfuck character; it is ignored as a comment
+    j       inc_pc
 
 exec_eof:
 
