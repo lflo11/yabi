@@ -18,7 +18,7 @@ not_implemented: .asciiz "not implemented: "
 .globl main
 main:
 
-    li      $s2, 120000 # save the default size of brainfuck's memory (30000
+    li      $s2, 120000 # save the default size of brainfuck's memory 30000
                         # cells, each one word (4 bytes) long
 
     move    $a0, $s2    # allocate brainfuck's memory on the heap

@@ -4,7 +4,13 @@ Yet Another Brainfuck Interpreter
 TODO
 ----
 
-+ Implement operators `><.,[]`
++ Implement `>` and `<`
+
++ ~~Implement `+` and `-`~~
+
++ Implement `.` and `,`
+
++ Implement `[` and `]`
 
 + Determine how the brainfuck code is entered and stored
 
